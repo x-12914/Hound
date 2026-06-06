@@ -1,9 +1,15 @@
-fastapi==0.115.6
-uvicorn[standard]==0.34.0
-sqlmodel==0.0.22
-pydantic-settings==2.7.1
-python-jose[cryptography]==3.3.0
-passlib[bcrypt]==1.7.4
-bcrypt==4.2.1
-python-multipart==0.0.20
-email-validator==2.2.0
+# Lower bounds (not exact pins) so pip can pick wheels that match the host
+# Python version — important on bleeding-edge interpreters (e.g. 3.14) where
+# older pinned builds have no prebuilt wheel.
+fastapi>=0.115
+uvicorn[standard]>=0.34
+sqlmodel>=0.0.22
+pydantic-settings>=2.7
+python-jose[cryptography]>=3.3
+bcrypt>=4.2
+python-multipart>=0.0.20
+email-validator>=2.2
+
+# Production server + Postgres driver (psycopg 3)
+gunicorn>=23.0
+psycopg[binary]>=3.2
