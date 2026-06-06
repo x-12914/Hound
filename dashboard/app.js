@@ -60,9 +60,10 @@ function logout() {
 let map;
 function initMap() {
   map = L.map("map", { zoomControl: true }).setView([20, 0], 2);
-  L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+  // Full-colour street basemap (CARTO Voyager) — a real map, not the dark tiles.
+  L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", {
     attribution: "&copy; OpenStreetMap &copy; CARTO",
-    maxZoom: 19,
+    maxZoom: 20,
   }).addTo(map);
 }
 
