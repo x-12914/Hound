@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="20dp"
+            android:text="Settings"
+            android:textColor="@color/text"
+            android:textSize="24sp"
+            android:textStyle="bold" />
+
+        <TextView style="@style/SettingLabel" android:text="Power presses to trigger" />
+        <EditText
+            android:id="@+id/pressCount"
+            style="@style/SettingInput"
+            android:inputType="number" />
+
+        <TextView style="@style/SettingLabel" android:text="Press window (ms)" />
+        <EditText
+            android:id="@+id/pressWindow"
+            style="@style/SettingInput"
+            android:inputType="number" />
+
+        <TextView style="@style/SettingLabel" android:text="Location update interval (sec)" />
+        <EditText
+            android:id="@+id/locInterval"
+            style="@style/SettingInput"
+            android:inputType="number" />
+
+        <TextView style="@style/SettingLabel" android:text="Audio clip length (sec)" />
+        <EditText
+            android:id="@+id/audioClip"
+            style="@style/SettingInput"
+            android:inputType="number" />
+
+        <Switch
+            android:id="@+id/captureAudio"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Capture audio during alerts"
+            android:textColor="@color/text" />
+
+        <TextView style="@style/SettingLabel" android:text="Server URL" />
+        <EditText
+            android:id="@+id/serverUrl"
+            style="@style/SettingInput"
+            android:inputType="textUri" />
+
+        <Button
+            android:id="@+id/save"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="Save"
+            android:backgroundTint="@color/accent"
+            android:textColor="@color/white" />
+    </LinearLayout>
+</ScrollView>

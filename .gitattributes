@@ -1,0 +1,9 @@
+# Normalize all text to LF in the repo so a Linux VPS checkout is clean.
+* text=auto eol=lf
+
+# Binaries (none yet, but future-proof)
+*.png binary
+*.jpg binary
+*.aac binary
+*.m4a binary
+*.jar binary

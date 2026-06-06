@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hound · Emergency Response</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Login overlay -->
+  <div id="login" class="login-overlay">
+    <form id="login-form" class="login-card">
+      <div class="brand"><span class="dot"></span> HOUND</div>
+      <p class="subtitle">Emergency Response Console</p>
+      <input id="email" type="email" placeholder="Email" autocomplete="username" required />
+      <input id="password" type="password" placeholder="Password" autocomplete="current-password" required />
+      <button type="submit">Sign in</button>
+      <div id="login-error" class="error"></div>
+    </form>
+  </div>
+
+  <!-- App -->
+  <div id="app" class="app hidden">
+    <header class="topbar">
+      <div class="brand"><span class="dot"></span> HOUND</div>
+      <div class="status">
+        <span id="ws-status" class="ws-dot offline" title="realtime status"></span>
+        <span id="ws-label">connecting…</span>
+      </div>
+      <div class="spacer"></div>
+      <span id="who" class="who"></span>
+      <button id="logout" class="ghost">Sign out</button>
+    </header>
+
+    <main class="layout">
+      <aside class="sidebar">
+        <div class="filter-row">
+          <button class="filter active" data-filter="active">Active</button>
+          <button class="filter" data-filter="all">All</button>
+        </div>
+        <div id="alert-list" class="alert-list"></div>
+      </aside>
+
+      <section class="map-wrap">
+        <div id="map"></div>
+        <div id="detail" class="detail hidden"></div>
+      </section>
+    </main>
+  </div>
+
+  <audio id="siren" preload="auto"></audio>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+  <script src="app.js"></script>
+</body>
+</html>
