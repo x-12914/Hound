@@ -6,6 +6,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.hound.app.data.Api
+import com.hound.app.data.ContactInput
 import com.hound.app.data.Prefs
 import com.hound.app.databinding.ActivityLoginBinding
 import kotlinx.coroutines.Dispatchers
@@ -36,7 +37,9 @@ class LoginActivity : AppCompatActivity() {
 
         binding.toggleMode.setOnClickListener {
             registerMode = !registerMode
-            binding.nameInput.visibility = if (registerMode) android.view.View.VISIBLE else android.view.View.GONE
+            val vis = if (registerMode) android.view.View.VISIBLE else android.view.View.GONE
+            binding.nameInput.visibility = vis
+            binding.contactsSection.visibility = vis
             binding.submit.text = if (registerMode) "Create account" else "Sign in"
             binding.toggleMode.text = if (registerMode) "Have an account? Sign in" else "New here? Create account"
         }
@@ -51,6 +54,28 @@ class LoginActivity : AppCompatActivity() {
         if (url.isEmpty() || email.isEmpty() || pass.isEmpty()) {
             toast("Fill in all fields"); return
         }
+
+        var contacts: List<ContactInput> = emptyList()
+        if (registerMode) {
+            val c1 = ContactInput(
+                binding.c1Name.text.toString().trim(),
+                binding.c1Phone.text.toString().trim(),
+                binding.c1Relation.text.toString().trim(),
+            )
+            val c2 = ContactInput(
+                binding.c2Name.text.toString().trim(),
+                binding.c2Phone.text.toString().trim(),
+                binding.c2Relation.text.toString().trim(),
+            )
+            for (c in listOf(c1, c2)) {
+                if (c.name.isEmpty() || c.phone.isEmpty() || c.relation.isEmpty()) {
+                    toast("Add both emergency contacts (name, phone, and relation)")
+                    return
+                }
+            }
+            contacts = listOf(c1, c2)
+        }
+
         prefs.baseUrl = url
         binding.submit.isEnabled = false
 
@@ -59,7 +84,9 @@ class LoginActivity : AppCompatActivity() {
                 val api = Api(prefs)
                 withContext(Dispatchers.IO) {
                     if (registerMode) {
-                        api.register(email, pass, binding.nameInput.text.toString().trim())
+                        api.register(
+                            email, pass, binding.nameInput.text.toString().trim(), contacts,
+                        )
                     } else {
                         api.login(email, pass)
                     }

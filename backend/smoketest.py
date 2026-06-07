@@ -86,7 +86,15 @@ check("health", s == 200 and b.get("status") == "ok")
 s, b = req(
     "POST",
     "/api/auth/register",
-    json_body={"email": "owner1@test.com", "password": "pw12345", "full_name": "Owner One"},
+    json_body={
+        "email": "owner1@test.com",
+        "password": "pw12345",
+        "full_name": "Owner One",
+        "contacts": [
+            {"name": "Contact A", "phone": "+10000000001", "relation": "Mother"},
+            {"name": "Contact B", "phone": "+10000000002", "relation": "Brother"},
+        ],
+    },
 )
 check("owner register", s == 200 and "access_token" in b, str(s))
 owner_token = b.get("access_token")
@@ -185,7 +193,14 @@ async def main():
     s, b = req(
         "POST",
         "/api/auth/register",
-        json_body={"email": "owner2@test.com", "password": "pw12345"},
+        json_body={
+            "email": "owner2@test.com",
+            "password": "pw12345",
+            "contacts": [
+                {"name": "C1", "phone": "+1", "relation": "Friend"},
+                {"name": "C2", "phone": "+2", "relation": "Friend"},
+            ],
+        },
     )
     other_token = b.get("access_token")
     s, b = req("GET", "/api/alerts", token=other_token)

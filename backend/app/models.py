@@ -30,6 +30,19 @@ class User(SQLModel, table=True):
     created_at: datetime = Field(default_factory=utcnow)
 
     devices: list["Device"] = Relationship(back_populates="owner")
+    emergency_contacts: list["EmergencyContact"] = Relationship(back_populates="user")
+
+
+class EmergencyContact(SQLModel, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    user_id: int = Field(foreign_key="user.id", index=True)
+    name: str
+    phone: str = ""
+    relation: str = ""
+    position: int = 0  # 1 or 2, preserves display order
+    created_at: datetime = Field(default_factory=utcnow)
+
+    user: User | None = Relationship(back_populates="emergency_contacts")
 
 
 class Device(SQLModel, table=True):

@@ -67,7 +67,7 @@ class Prefs(context: Context) {
     }
 
     companion object {
-        // Android emulator reaches the host machine at 10.0.2.2.
-        const val DEFAULT_BASE_URL = "http://10.0.2.2:8000"
+        // Production server, pre-filled so users don't type it.
+        const val DEFAULT_BASE_URL = "https://hound.157.250.205.174.nip.io"
     }
 }

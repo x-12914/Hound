@@ -194,6 +194,29 @@ button.ghost:hover { color: var(--text); border-color: var(--muted-2); filter: n
 .detail .actions .resolve { background: var(--ok); color: #04220f; }
 .detail .section-title { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin: 16px 0 9px; font-weight: 600; }
 .detail audio { width: 100%; margin-bottom: 8px; border-radius: 8px; }
+
+/* emergency contacts */
+.contacts { display: flex; flex-direction: column; gap: 8px; }
+.contact {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  background: var(--panel-2);
+  border: 1px solid var(--border-soft);
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+.contact-main { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.contact-name { font-weight: 600; font-size: 14px; color: var(--text); }
+.contact-rel {
+  font-size: 10px; text-transform: uppercase; letter-spacing: .6px;
+  color: var(--muted); font-weight: 600;
+}
+.contact-phone {
+  font-family: var(--font-mono); font-size: 13px; color: var(--accent);
+  text-decoration: none; white-space: nowrap;
+  padding: 6px 10px; border: 1px solid var(--accent-dim); border-radius: 8px;
+  transition: background 0.18s var(--ease);
+}
+.contact-phone:hover { background: rgba(255, 59, 78, 0.12); }
 .detail .close {
   position: absolute; top: 12px; right: 14px;
   background: transparent; color: var(--muted); padding: 3px 7px;

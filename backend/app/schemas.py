@@ -7,10 +7,26 @@ from .models import AlertStatus, Role
 # ---- Auth ----
 
 
+class EmergencyContactIn(BaseModel):
+    name: str
+    phone: str = ""
+    relation: str = ""
+
+
+class EmergencyContactOut(BaseModel):
+    name: str
+    phone: str
+    relation: str
+
+    class Config:
+        from_attributes = True
+
+
 class RegisterRequest(BaseModel):
     email: EmailStr
     password: str
     full_name: str = ""
+    contacts: list[EmergencyContactIn] = []
 
 
 class LoginRequest(BaseModel):
@@ -115,6 +131,7 @@ class AlertOut(BaseModel):
 class AlertDetailOut(AlertOut):
     locations: list[LocationOut] = []
     audio_clips: list[AudioOut] = []
+    contacts: list[EmergencyContactOut] = []
     device_name: str = ""
     owner_email: str = ""
 

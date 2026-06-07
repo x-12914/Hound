@@ -4,7 +4,7 @@ from sqlmodel import Session, select
 
 from ..database import get_session
 from ..deps import get_current_user
-from ..models import Role, User
+from ..models import EmergencyContact, Role, User
 from ..schemas import LoginRequest, RegisterRequest, TokenResponse, UserOut
 from ..security import create_access_token, hash_password, verify_password
 
@@ -25,6 +25,12 @@ def register(body: RegisterRequest, session: Session = Depends(get_session)):
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT, detail="Email already registered"
         )
+    valid_contacts = [c for c in body.contacts if c.name.strip()]
+    if len(valid_contacts) < 2:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Two emergency contacts are required",
+        )
     user = User(
         email=body.email,
         hashed_password=hash_password(body.password),
@@ -34,6 +40,18 @@ def register(body: RegisterRequest, session: Session = Depends(get_session)):
     session.add(user)
     session.commit()
     session.refresh(user)
+
+    for i, c in enumerate(valid_contacts[:2], start=1):
+        session.add(
+            EmergencyContact(
+                user_id=user.id,
+                name=c.name.strip(),
+                phone=c.phone.strip(),
+                relation=c.relation.strip(),
+                position=i,
+            )
+        )
+    session.commit()
     return _issue_token(user)
 
 

@@ -22,6 +22,7 @@ from ..models import (
     AlertStatus,
     AudioClip,
     Device,
+    EmergencyContact,
     LocationPoint,
     Role,
     User,
@@ -32,6 +33,7 @@ from ..schemas import (
     AlertDetailOut,
     AlertOut,
     AudioOut,
+    EmergencyContactOut,
     LocationIn,
     LocationOut,
     StatusUpdateRequest,
@@ -64,7 +66,24 @@ def _location_payload(loc: LocationPoint) -> dict:
     }
 
 
-def _alert_summary(alert: Alert, device: Device | None, owner: User | None) -> dict:
+def _contacts_for(user_id: int, session: Session) -> list[EmergencyContact]:
+    return session.exec(
+        select(EmergencyContact)
+        .where(EmergencyContact.user_id == user_id)
+        .order_by(EmergencyContact.position)
+    ).all()
+
+
+def _contact_payload(c: EmergencyContact) -> dict:
+    return {"name": c.name, "phone": c.phone, "relation": c.relation}
+
+
+def _alert_summary(
+    alert: Alert,
+    device: Device | None,
+    owner: User | None,
+    contacts: list[EmergencyContact] | None = None,
+) -> dict:
     return {
         "id": alert.id,
         "device_id": alert.device_id,
@@ -74,6 +93,7 @@ def _alert_summary(alert: Alert, device: Device | None, owner: User | None) -> d
         "note": alert.note,
         "device_name": device.name if device else "",
         "owner_email": owner.email if owner else "",
+        "contacts": [_contact_payload(c) for c in (contacts or [])],
     }
 
 
@@ -110,7 +130,9 @@ async def create_alert(
         session.commit()
         session.refresh(loc)
 
-    summary = _alert_summary(alert, device, user)
+    summary = _alert_summary(
+        alert, device, user, _contacts_for(user.id, session)
+    )
     if body.location is not None:
         summary["location"] = _location_payload(loc)
     await manager.broadcast({"type": "alert.new", "alert": summary}, owner_id=user.id)
@@ -221,6 +243,9 @@ def list_alerts(
         detail = AlertDetailOut.model_validate(a)
         detail.locations = [LocationOut.model_validate(l) for l in a.locations]
         detail.audio_clips = [AudioOut.model_validate(c) for c in a.audio_clips]
+        detail.contacts = [
+            EmergencyContactOut.model_validate(c) for c in _contacts_for(a.owner_id, session)
+        ]
         detail.device_name = device.name if device else ""
         detail.owner_email = owner.email if owner else ""
         out.append(detail)
@@ -239,6 +264,9 @@ def get_alert(
     detail = AlertDetailOut.model_validate(alert)
     detail.locations = [LocationOut.model_validate(l) for l in alert.locations]
     detail.audio_clips = [AudioOut.model_validate(c) for c in alert.audio_clips]
+    detail.contacts = [
+        EmergencyContactOut.model_validate(c) for c in _contacts_for(alert.owner_id, session)
+    ]
     detail.device_name = device.name if device else ""
     detail.owner_email = owner.email if owner else ""
     return detail

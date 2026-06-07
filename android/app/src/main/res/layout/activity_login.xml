@@ -79,6 +79,122 @@
             android:padding="14dp"
             android:layout_marginBottom="20dp" />
 
+        <LinearLayout
+            android:id="@+id/contactsSection"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone"
+            android:layout_marginBottom="8dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="4dp"
+                android:text="Emergency contacts"
+                android:textColor="@color/text"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
+                android:text="Two people we can alert if you're in danger."
+                android:textColor="@color/muted"
+                android:textSize="12sp" />
+
+            <!-- Contact 1 -->
+            <EditText
+                android:id="@+id/c1Name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_input"
+                android:hint="Contact 1 — full name"
+                android:textColorHint="@color/muted"
+                android:textColor="@color/text"
+                android:inputType="textPersonName"
+                android:padding="14dp"
+                android:layout_marginBottom="8dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="14dp">
+
+                <EditText
+                    android:id="@+id/c1Phone"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_input"
+                    android:hint="Phone"
+                    android:textColorHint="@color/muted"
+                    android:textColor="@color/text"
+                    android:inputType="phone"
+                    android:padding="14dp"
+                    android:layout_marginEnd="8dp" />
+
+                <EditText
+                    android:id="@+id/c1Relation"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_input"
+                    android:hint="Relation"
+                    android:textColorHint="@color/muted"
+                    android:textColor="@color/text"
+                    android:inputType="textCapWords"
+                    android:padding="14dp" />
+            </LinearLayout>
+
+            <!-- Contact 2 -->
+            <EditText
+                android:id="@+id/c2Name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_input"
+                android:hint="Contact 2 — full name"
+                android:textColorHint="@color/muted"
+                android:textColor="@color/text"
+                android:inputType="textPersonName"
+                android:padding="14dp"
+                android:layout_marginBottom="8dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="8dp">
+
+                <EditText
+                    android:id="@+id/c2Phone"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_input"
+                    android:hint="Phone"
+                    android:textColorHint="@color/muted"
+                    android:textColor="@color/text"
+                    android:inputType="phone"
+                    android:padding="14dp"
+                    android:layout_marginEnd="8dp" />
+
+                <EditText
+                    android:id="@+id/c2Relation"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_input"
+                    android:hint="Relation"
+                    android:textColorHint="@color/muted"
+                    android:textColor="@color/text"
+                    android:inputType="textCapWords"
+                    android:padding="14dp" />
+            </LinearLayout>
+        </LinearLayout>
+
         <Button
             android:id="@+id/submit"
             android:layout_width="match_parent"

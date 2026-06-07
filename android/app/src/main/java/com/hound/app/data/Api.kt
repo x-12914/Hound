@@ -6,9 +6,13 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
+import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
 import java.util.concurrent.TimeUnit
+
+/** An emergency contact captured at registration. */
+data class ContactInput(val name: String, val phone: String, val relation: String)
 
 /**
  * Tiny synchronous API client over OkHttp + org.json. Call from a background
@@ -62,9 +66,26 @@ class Api(private val prefs: Prefs) {
         return token
     }
 
-    fun register(email: String, password: String, fullName: String): String {
+    fun register(
+        email: String,
+        password: String,
+        fullName: String,
+        contacts: List<ContactInput>,
+    ): String {
+        val arr = JSONArray()
+        for (c in contacts) {
+            arr.put(
+                JSONObject()
+                    .put("name", c.name)
+                    .put("phone", c.phone)
+                    .put("relation", c.relation)
+            )
+        }
         val payload = JSONObject()
-            .put("email", email).put("password", password).put("full_name", fullName)
+            .put("email", email)
+            .put("password", password)
+            .put("full_name", fullName)
+            .put("contacts", arr)
         val req = Request.Builder()
             .url(url("/api/auth/register"))
             .post(payload.toString().toRequestBody(jsonMedia))

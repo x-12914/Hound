@@ -221,6 +221,18 @@ function renderDetail(a) {
       ${a.status === "active" ? `<button class="ack" id="btn-ack">Acknowledge</button>` : ""}
       ${a.status !== "resolved" && a.status !== "cancelled" ? `<button class="resolve" id="btn-resolve">Resolve</button>` : ""}
     </div>
+    ${(a.contacts && a.contacts.length) ? `
+      <div class="section-title">Emergency contacts</div>
+      <div class="contacts">
+        ${a.contacts.map((ct) => `
+          <div class="contact">
+            <div class="contact-main">
+              <span class="contact-name">${escapeHtml(ct.name)}</span>
+              ${ct.relation ? `<span class="contact-rel">${escapeHtml(ct.relation)}</span>` : ""}
+            </div>
+            ${ct.phone ? `<a class="contact-phone" href="tel:${escapeHtml(ct.phone)}">${escapeHtml(ct.phone)}</a>` : ""}
+          </div>`).join("")}
+      </div>` : ""}
     <div class="section-title" id="d-audiocount">${audioCountText(a)}</div>
     <div id="audio-container"></div>
     <a class="sub" id="d-mapslink" target="_blank" rel="noopener" style="display:none">Open in Google Maps ↗</a>
