@@ -40,7 +40,7 @@
                 android:id="@+id/checkPermissions"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="○ Location & microphone"
+                android:text="○ Location &amp; microphone"
                 android:textColor="@color/text"
                 android:textSize="15sp" />
 

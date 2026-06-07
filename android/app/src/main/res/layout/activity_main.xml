@@ -96,7 +96,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
-            android:text="Cancel active alert (I'm safe)"
+            android:text="Cancel active alert (I\'m safe)"
             android:backgroundTint="@color/panel2"
             android:textColor="@color/text" />
 
