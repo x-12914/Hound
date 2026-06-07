@@ -165,12 +165,48 @@ function selectAlert(id) {
   if (a) { focusAlert(a); renderDetail(a); }
 }
 
-async function renderDetail(a) {
+// clipId -> object URL. Cached so a clip is fetched exactly once; re-rendering
+// the panel never re-downloads it (that re-fetch was the disappear/reappear bug).
+const audioUrlCache = new Map();
+
+function audioCountText(a) {
+  return `Audio clips (${(a.audio_clips || []).length})`;
+}
+
+// Add a player for one clip, idempotently. If a player for this clip already
+// exists it does nothing — so repeated calls never churn the list or interrupt
+// a clip that's currently playing.
+async function ensureAudioPlayer(container, alertId, clip) {
+  if (container.querySelector(`audio[data-clip="${clip.id}"]`)) return;
+  const empty = container.querySelector(".audio-empty");
+  if (empty) empty.remove();
+
+  const audio = document.createElement("audio");
+  audio.controls = true;
+  audio.preload = "none";
+  audio.dataset.clip = String(clip.id);
+  container.appendChild(audio); // append now to preserve order; src fills in below
+
+  let url = audioUrlCache.get(clip.id);
+  if (!url) {
+    try {
+      const res = await api(`/api/alerts/${alertId}/audio/${clip.id}/file`);
+      const blob = await res.blob();
+      url = URL.createObjectURL(blob);
+      audioUrlCache.set(clip.id, url);
+    } catch (e) {
+      audio.remove();
+      return;
+    }
+  }
+  audio.src = url;
+}
+
+// Full (re)build of the panel — used on select and on status change only.
+function renderDetail(a) {
   const d = $("#detail");
   d.classList.remove("hidden");
-  const p = latestPoint(a);
   const triggered = new Date(a.triggered_at).toLocaleString();
-  const canTriage = true;
 
   d.innerHTML = `
     <button class="close" id="detail-close">✕</button>
@@ -178,35 +214,54 @@ async function renderDetail(a) {
     <div class="sub">${escapeHtml(a.device_name || "device")} · alert #${a.id}</div>
     <div class="kv"><span>Status</span><span class="badge ${a.status}">${a.status}</span></div>
     <div class="kv"><span>Triggered</span><span>${triggered}</span></div>
-    <div class="kv"><span>Location pts</span><span>${(a.locations || []).length}</span></div>
-    ${p ? `<div class="kv"><span>Last fix</span><span>${p.lat.toFixed(5)}, ${p.lng.toFixed(5)}</span></div>` : ""}
-    ${p && p.accuracy_m != null ? `<div class="kv"><span>Accuracy</span><span>±${Math.round(p.accuracy_m)} m</span></div>` : ""}
-    ${canTriage ? `<div class="actions">
+    <div class="kv"><span>Location pts</span><span id="d-loccount">${(a.locations || []).length}</span></div>
+    <div class="kv"><span>Last fix</span><span id="d-lastfix">—</span></div>
+    <div class="kv"><span>Accuracy</span><span id="d-accuracy">—</span></div>
+    <div class="actions">
       ${a.status === "active" ? `<button class="ack" id="btn-ack">Acknowledge</button>` : ""}
       ${a.status !== "resolved" && a.status !== "cancelled" ? `<button class="resolve" id="btn-resolve">Resolve</button>` : ""}
-    </div>` : ""}
-    <div class="section-title">Audio clips (${(a.audio_clips || []).length})</div>
-    <div id="audio-container">${(a.audio_clips || []).length ? "" : '<div class="sub">No audio yet.</div>'}</div>
-    ${p ? `<a class="sub" href="https://www.google.com/maps?q=${p.lat},${p.lng}" target="_blank">Open in Google Maps ↗</a>` : ""}
+    </div>
+    <div class="section-title" id="d-audiocount">${audioCountText(a)}</div>
+    <div id="audio-container"></div>
+    <a class="sub" id="d-mapslink" target="_blank" rel="noopener" style="display:none">Open in Google Maps ↗</a>
   `;
 
   $("#detail-close").onclick = () => d.classList.add("hidden");
   const ack = $("#btn-ack"); if (ack) ack.onclick = () => setStatus(a.id, "acknowledged");
   const rev = $("#btn-resolve"); if (rev) rev.onclick = () => setStatus(a.id, "resolved");
 
-  // Load audio clips as authenticated blobs.
   const container = $("#audio-container");
-  for (const clip of a.audio_clips || []) {
-    try {
-      const res = await api(`/api/alerts/${a.id}/audio/${clip.id}/file`);
-      const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-      const audio = document.createElement("audio");
-      audio.controls = true;
-      audio.src = url;
-      container.appendChild(audio);
-    } catch (e) { /* ignore */ }
+  if (!(a.audio_clips || []).length) {
+    container.innerHTML = '<div class="sub audio-empty">No audio yet.</div>';
+  } else {
+    for (const clip of a.audio_clips) ensureAudioPlayer(container, a.id, clip);
   }
+  updateDetailDynamic(a);
+}
+
+// Lightweight in-place update for streaming location events — never touches the
+// audio list, so players don't flicker or stop.
+function updateDetailDynamic(a) {
+  const d = $("#detail");
+  if (!d || d.classList.contains("hidden") || state.selected !== a.id) return;
+  const p = latestPoint(a);
+  const lc = $("#d-loccount"); if (lc) lc.textContent = (a.locations || []).length;
+  const lf = $("#d-lastfix"); if (lf) lf.textContent = p ? `${p.lat.toFixed(5)}, ${p.lng.toFixed(5)}` : "—";
+  const ac = $("#d-accuracy"); if (ac) ac.textContent = (p && p.accuracy_m != null) ? `±${Math.round(p.accuracy_m)} m` : "—";
+  const ml = $("#d-mapslink");
+  if (ml) {
+    if (p) { ml.href = `https://www.google.com/maps?q=${p.lat},${p.lng}`; ml.style.display = "inline-block"; }
+    else { ml.style.display = "none"; }
+  }
+}
+
+// Append a single newly-arrived clip without rebuilding the others.
+function addAudioToDetail(a, clip) {
+  const d = $("#detail");
+  if (!d || d.classList.contains("hidden") || state.selected !== a.id) return;
+  const count = $("#d-audiocount"); if (count) count.textContent = audioCountText(a);
+  const container = $("#audio-container");
+  if (container) ensureAudioPlayer(container, a.id, clip);
 }
 
 async function setStatus(id, status) {
@@ -253,7 +308,7 @@ function handleEvent(ev) {
       a.locations = a.locations || [];
       a.locations.push(ev.location);
       renderMapForAlert(a);
-      if (state.selected === a.id) { renderDetail(a); }
+      updateDetailDynamic(a);   // in-place; leaves audio players untouched
       renderList();
     }
   } else if (ev.type === "alert.audio") {
@@ -261,7 +316,7 @@ function handleEvent(ev) {
     if (a) {
       a.audio_clips = a.audio_clips || [];
       a.audio_clips.push(ev.audio);
-      if (state.selected === a.id) renderDetail(a);
+      addAudioToDetail(a, ev.audio);   // append just this clip
     }
   } else if (ev.type === "alert.status") {
     const a = state.alerts.get(ev.alert_id);
