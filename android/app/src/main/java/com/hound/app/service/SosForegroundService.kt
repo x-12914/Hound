@@ -12,6 +12,7 @@ import android.content.pm.PackageManager
 import android.content.pm.ServiceInfo
 import android.os.Build
 import android.os.IBinder
+import android.os.PowerManager
 import android.os.SystemClock
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
@@ -33,6 +34,7 @@ class SosForegroundService : Service() {
 
     private val toggleTimes = ArrayDeque<Long>()
     private var lastTriggerAt = 0L
+    private var wakeLock: PowerManager.WakeLock? = null
 
     private val screenReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
@@ -55,7 +57,35 @@ class SosForegroundService : Service() {
             this, screenReceiver, filter, ContextCompat.RECEIVER_NOT_EXPORTED,
         )
 
+        acquireWakeLock()
         startInForeground(guardianNotification())
+    }
+
+    /**
+     * Holds the CPU awake so the screen-toggle receiver keeps firing while the
+     * app is in the background or the device is dozing — without this, many
+     * phones freeze the process and the power-press trigger stops working.
+     */
+    private fun acquireWakeLock() {
+        if (wakeLock?.isHeld == true) return
+        try {
+            val pm = getSystemService(Context.POWER_SERVICE) as PowerManager
+            wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "hound:guardian").apply {
+                setReferenceCounted(false)
+                acquire()
+            }
+        } catch (e: Exception) { /* best effort */ }
+    }
+
+    override fun onTaskRemoved(rootIntent: Intent?) {
+        // Keep protecting after the app is swiped from recents.
+        try {
+            ContextCompat.startForegroundService(
+                applicationContext,
+                Intent(applicationContext, SosForegroundService::class.java),
+            )
+        } catch (e: Exception) { /* already running */ }
+        super.onTaskRemoved(rootIntent)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -157,6 +187,8 @@ class SosForegroundService : Service() {
 
     override fun onDestroy() {
         try { unregisterReceiver(screenReceiver) } catch (e: Exception) {}
+        try { if (wakeLock?.isHeld == true) wakeLock?.release() } catch (e: Exception) {}
+        wakeLock = null
         sos.cancel()
         super.onDestroy()
     }

@@ -12,36 +12,31 @@
         android:gravity="center_horizontal"
         android:padding="24dp">
 
+        <ImageView
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:layout_marginTop="56dp"
+            android:src="@drawable/ic_shield"
+            android:tint="@color/accent"
+            android:contentDescription="Hound" />
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="48dp"
+            android:layout_marginTop="14dp"
             android:text="HOUND"
             android:textColor="@color/text"
-            android:textSize="34sp"
+            android:textSize="32sp"
             android:textStyle="bold"
             android:letterSpacing="0.2" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="32dp"
-            android:text="Emergency Response"
+            android:layout_marginBottom="36dp"
+            android:text="Welcome back"
             android:textColor="@color/muted"
             android:textSize="14sp" />
-
-        <EditText
-            android:id="@+id/nameInput"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/bg_input"
-            android:hint="Full name"
-            android:textColorHint="@color/muted"
-            android:textColor="@color/text"
-            android:inputType="textPersonName"
-            android:padding="14dp"
-            android:visibility="gone"
-            android:layout_marginBottom="12dp" />
 
         <EditText
             android:id="@+id/email"
@@ -65,123 +60,15 @@
             android:textColor="@color/text"
             android:inputType="textPassword"
             android:padding="14dp"
-            android:layout_marginBottom="20dp" />
+            android:layout_marginBottom="6dp" />
 
-        <LinearLayout
-            android:id="@+id/contactsSection"
+        <TextView
+            android:id="@+id/loginError"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:visibility="gone"
-            android:layout_marginBottom="8dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="4dp"
-                android:text="Emergency contacts"
-                android:textColor="@color/text"
-                android:textSize="15sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="12dp"
-                android:text="Two people we can alert if you're in danger."
-                android:textColor="@color/muted"
-                android:textSize="12sp" />
-
-            <!-- Contact 1 -->
-            <EditText
-                android:id="@+id/c1Name"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/bg_input"
-                android:hint="Contact 1 — full name"
-                android:textColorHint="@color/muted"
-                android:textColor="@color/text"
-                android:inputType="textPersonName"
-                android:padding="14dp"
-                android:layout_marginBottom="8dp" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginBottom="14dp">
-
-                <EditText
-                    android:id="@+id/c1Phone"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/bg_input"
-                    android:hint="Phone"
-                    android:textColorHint="@color/muted"
-                    android:textColor="@color/text"
-                    android:inputType="phone"
-                    android:padding="14dp"
-                    android:layout_marginEnd="8dp" />
-
-                <EditText
-                    android:id="@+id/c1Relation"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/bg_input"
-                    android:hint="Relation"
-                    android:textColorHint="@color/muted"
-                    android:textColor="@color/text"
-                    android:inputType="textCapWords"
-                    android:padding="14dp" />
-            </LinearLayout>
-
-            <!-- Contact 2 -->
-            <EditText
-                android:id="@+id/c2Name"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/bg_input"
-                android:hint="Contact 2 — full name"
-                android:textColorHint="@color/muted"
-                android:textColor="@color/text"
-                android:inputType="textPersonName"
-                android:padding="14dp"
-                android:layout_marginBottom="8dp" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginBottom="8dp">
-
-                <EditText
-                    android:id="@+id/c2Phone"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/bg_input"
-                    android:hint="Phone"
-                    android:textColorHint="@color/muted"
-                    android:textColor="@color/text"
-                    android:inputType="phone"
-                    android:padding="14dp"
-                    android:layout_marginEnd="8dp" />
-
-                <EditText
-                    android:id="@+id/c2Relation"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/bg_input"
-                    android:hint="Relation"
-                    android:textColorHint="@color/muted"
-                    android:textColor="@color/text"
-                    android:inputType="textCapWords"
-                    android:padding="14dp" />
-            </LinearLayout>
-        </LinearLayout>
+            android:layout_marginBottom="14dp"
+            android:textColor="@color/accent"
+            android:textSize="13sp" />
 
         <Button
             android:id="@+id/submit"
@@ -192,12 +79,13 @@
             android:textColor="@color/white" />
 
         <TextView
-            android:id="@+id/toggleMode"
+            android:id="@+id/goToSignup"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="18dp"
+            android:layout_marginTop="22dp"
             android:padding="8dp"
-            android:text="New here? Create account"
-            android:textColor="@color/accent" />
+            android:text="New to Hound? Create an account"
+            android:textColor="@color/accent"
+            android:textSize="14sp" />
     </LinearLayout>
 </ScrollView>

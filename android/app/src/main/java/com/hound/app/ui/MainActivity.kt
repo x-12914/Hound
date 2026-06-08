@@ -40,7 +40,12 @@ class MainActivity : AppCompatActivity() {
         binding.btnLogout.setOnClickListener { logout() }
     }
 
-    override fun onResume() { super.onResume(); render() }
+    override fun onResume() {
+        super.onResume()
+        // Self-heal: if protection is on, make sure the guardian is actually running.
+        if (prefs.guardianEnabled) SosForegroundService.start(this)
+        render()
+    }
 
     private fun render() {
         binding.guardianSwitch.isChecked = prefs.guardianEnabled

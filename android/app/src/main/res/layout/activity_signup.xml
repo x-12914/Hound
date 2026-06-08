@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg"
+    android:orientation="vertical"
+    android:padding="24dp">
+
+    <!-- progress segments -->
+    <LinearLayout
+        android:id="@+id/progressBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:orientation="horizontal">
+
+        <View android:layout_width="0dp" android:layout_weight="1" android:layout_height="5dp" android:layout_marginEnd="4dp" android:background="@color/border" />
+        <View android:layout_width="0dp" android:layout_weight="1" android:layout_height="5dp" android:layout_marginEnd="4dp" android:background="@color/border" />
+        <View android:layout_width="0dp" android:layout_weight="1" android:layout_height="5dp" android:layout_marginEnd="4dp" android:background="@color/border" />
+        <View android:layout_width="0dp" android:layout_weight="1" android:layout_height="5dp" android:background="@color/border" />
+    </LinearLayout>
+
+    <ViewFlipper
+        android:id="@+id/flipper"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginTop="20dp">
+
+        <!-- Step 0: Welcome -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:gravity="center">
+
+            <ImageView
+                android:layout_width="84dp"
+                android:layout_height="84dp"
+                android:src="@drawable/ic_shield"
+                android:tint="@color/accent"
+                android:contentDescription="Hound" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:text="Welcome to Hound"
+                android:textColor="@color/text"
+                android:textSize="26sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Silent protection in your pocket."
+                android:textColor="@color/muted"
+                android:textSize="15sp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginTop="28dp"
+                android:background="@drawable/bg_card"
+                android:padding="20dp">
+
+                <TextView style="@style/SignupBullet" android:text="🔘  Press power 3× fast to send a silent SOS" />
+                <TextView style="@style/SignupBullet" android:text="📍  Your live location reaches the people you trust" />
+                <TextView style="@style/SignupBullet" android:text="📶  Works even with no internet, over SMS" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Step 1: Account -->
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView style="@style/SignupTitle" android:text="Create your account" />
+                <TextView style="@style/SignupSub" android:text="This is how you'll sign in to Hound." />
+
+                <EditText android:id="@+id/nameInput" style="@style/SignupField" android:hint="Full name" android:inputType="textPersonName" />
+                <EditText android:id="@+id/email" style="@style/SignupField" android:hint="Email" android:inputType="textEmailAddress" />
+                <EditText android:id="@+id/password" style="@style/SignupField" android:hint="Password" android:inputType="textPassword" />
+            </LinearLayout>
+        </ScrollView>
+
+        <!-- Step 2: Contact 1 -->
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView style="@style/SignupTitle" android:text="Add your first lifeline" />
+                <TextView style="@style/SignupSub" android:text="If you're ever in danger, Hound alerts these people with your location — even with no internet. Who should we reach first?" />
+
+                <EditText android:id="@+id/c1Name" style="@style/SignupField" android:hint="Full name" android:inputType="textPersonName" />
+                <EditText android:id="@+id/c1Phone" style="@style/SignupField" android:hint="Phone number" android:inputType="phone" />
+                <EditText android:id="@+id/c1Relation" style="@style/SignupField" android:hint="Relation (e.g. Mother, Brother)" android:inputType="textCapWords" />
+            </LinearLayout>
+        </ScrollView>
+
+        <!-- Step 3: Contact 2 -->
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView style="@style/SignupTitle" android:text="One more lifeline" />
+                <TextView style="@style/SignupSub" android:text="A second trusted person we can reach if the first doesn't respond." />
+
+                <EditText android:id="@+id/c2Name" style="@style/SignupField" android:hint="Full name" android:inputType="textPersonName" />
+                <EditText android:id="@+id/c2Phone" style="@style/SignupField" android:hint="Phone number" android:inputType="phone" />
+                <EditText android:id="@+id/c2Relation" style="@style/SignupField" android:hint="Relation (e.g. Friend, Partner)" android:inputType="textCapWords" />
+            </LinearLayout>
+        </ScrollView>
+    </ViewFlipper>
+
+    <TextView
+        android:id="@+id/errorText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:textColor="@color/accent"
+        android:textSize="13sp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="10dp"
+        android:gravity="center_vertical">
+
+        <Button
+            android:id="@+id/btnBack"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Back"
+            android:backgroundTint="@color/panel"
+            android:textColor="@color/muted" />
+
+        <View android:layout_width="0dp" android:layout_weight="1" android:layout_height="1dp" />
+
+        <Button
+            android:id="@+id/btnNext"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minWidth="160dp"
+            android:text="Get started"
+            android:backgroundTint="@color/accent"
+            android:textColor="@color/white" />
+    </LinearLayout>
+</LinearLayout>

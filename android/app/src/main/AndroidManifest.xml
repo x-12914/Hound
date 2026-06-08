@@ -42,6 +42,7 @@
             </intent-filter>
         </activity>
 
+        <activity android:name=".ui.SignupActivity" android:exported="false" />
         <activity android:name=".ui.OnboardingActivity" android:exported="false" />
         <activity android:name=".ui.MainActivity" android:exported="false" />
         <activity android:name=".ui.SettingsActivity" android:exported="false" />
@@ -51,6 +52,7 @@
         <service
             android:name=".service.SosForegroundService"
             android:exported="false"
+            android:stopWithTask="false"
             android:foregroundServiceType="location|microphone" />
 
         <receiver
