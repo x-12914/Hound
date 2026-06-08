@@ -22,6 +22,8 @@ class SettingsActivity : AppCompatActivity() {
         binding.locInterval.setText(prefs.locationIntervalSec.toString())
         binding.audioClip.setText(prefs.audioClipSec.toString())
         binding.captureAudio.isChecked = prefs.captureAudio
+        binding.smsFallback.isChecked = prefs.smsFallback
+        binding.smsUpdateMin.setText(prefs.smsUpdateMin.toString())
         binding.serverUrl.setText(prefs.baseUrl)
 
         binding.save.setOnClickListener { save() }
@@ -33,6 +35,8 @@ class SettingsActivity : AppCompatActivity() {
         prefs.locationIntervalSec = binding.locInterval.text.toString().toIntOrNull()?.coerceIn(3, 120) ?: 10
         prefs.audioClipSec = binding.audioClip.text.toString().toIntOrNull()?.coerceIn(5, 60) ?: 15
         prefs.captureAudio = binding.captureAudio.isChecked
+        prefs.smsFallback = binding.smsFallback.isChecked
+        prefs.smsUpdateMin = binding.smsUpdateMin.text.toString().toIntOrNull()?.coerceIn(1, 30) ?: 2
         prefs.baseUrl = binding.serverUrl.text.toString().trim()
         Toast.makeText(this, "Saved", Toast.LENGTH_SHORT).show()
         finish()

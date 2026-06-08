@@ -30,6 +30,7 @@ class OnboardingActivity : AppCompatActivity() {
         add(Manifest.permission.ACCESS_FINE_LOCATION)
         add(Manifest.permission.ACCESS_COARSE_LOCATION)
         add(Manifest.permission.RECORD_AUDIO)
+        add(Manifest.permission.SEND_SMS)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             add(Manifest.permission.POST_NOTIFICATIONS)
         }
@@ -67,7 +68,7 @@ class OnboardingActivity : AppCompatActivity() {
             granted(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
         val battOk = isIgnoringBattery()
 
-        binding.checkPermissions.text = if (baseOk) "✓ Location & microphone granted" else "○ Location & microphone"
+        binding.checkPermissions.text = if (baseOk) "✓ Location, microphone & SMS granted" else "○ Location, microphone & SMS"
         binding.checkBackground.text = if (bgOk) "✓ Background location granted" else "○ Background location (\"Allow all the time\")"
         binding.checkBattery.text = if (battOk) "✓ Battery optimization disabled" else "○ Keep running in background"
 

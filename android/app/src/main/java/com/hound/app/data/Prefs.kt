@@ -1,6 +1,8 @@
 package com.hound.app.data
 
 import android.content.Context
+import org.json.JSONArray
+import org.json.JSONObject
 import java.util.UUID
 
 /** Lightweight persisted settings + session. */
@@ -55,6 +57,48 @@ class Prefs(context: Context) {
     var captureAudio: Boolean
         get() = sp.getBoolean("capture_audio", true)
         set(v) = sp.edit().putBoolean("capture_audio", v).apply()
+
+    /** Text the emergency contacts directly when there's no internet. */
+    var smsFallback: Boolean
+        get() = sp.getBoolean("sms_fallback", true)
+        set(v) = sp.edit().putBoolean("sms_fallback", v).apply()
+
+    /** How often to re-send a location SMS while still offline (minutes). */
+    var smsUpdateMin: Int
+        get() = sp.getInt("sms_update_min", 2)
+        set(v) = sp.edit().putInt("sms_update_min", v).apply()
+
+    /** Name used in the SMS ("SOS! <name> triggered an emergency"). */
+    var ownerName: String?
+        get() = sp.getString("owner_name", null)
+        set(v) = sp.edit().putString("owner_name", v).apply()
+
+    /** Emergency contacts cached locally so SMS works with no internet. */
+    fun setContacts(list: List<ContactInput>) {
+        val arr = JSONArray()
+        for (c in list) {
+            arr.put(
+                JSONObject()
+                    .put("name", c.name)
+                    .put("phone", c.phone)
+                    .put("relation", c.relation)
+            )
+        }
+        sp.edit().putString("contacts", arr.toString()).apply()
+    }
+
+    fun getContacts(): List<ContactInput> {
+        val raw = sp.getString("contacts", null) ?: return emptyList()
+        return try {
+            val arr = JSONArray(raw)
+            (0 until arr.length()).map { i ->
+                val o = arr.getJSONObject(i)
+                ContactInput(o.optString("name"), o.optString("phone"), o.optString("relation"))
+            }
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
 
     var guardianEnabled: Boolean
         get() = sp.getBoolean("guardian_enabled", false)

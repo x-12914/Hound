@@ -76,6 +76,7 @@ class LoginActivity : AppCompatActivity() {
             contacts = listOf(c1, c2)
         }
 
+        val fullName = binding.nameInput.text.toString().trim()
         prefs.baseUrl = url
         binding.submit.isEnabled = false
 
@@ -84,13 +85,19 @@ class LoginActivity : AppCompatActivity() {
                 val api = Api(prefs)
                 withContext(Dispatchers.IO) {
                     if (registerMode) {
-                        api.register(
-                            email, pass, binding.nameInput.text.toString().trim(), contacts,
-                        )
+                        api.register(email, pass, fullName, contacts)
+                        // cache locally right away so SMS fallback works offline
+                        prefs.setContacts(contacts)
+                        prefs.ownerName = fullName
                     } else {
                         api.login(email, pass)
                     }
                     api.registerDevice(android.os.Build.MODEL ?: "Android phone")
+                    // refresh the cached contacts from the server (covers the login case)
+                    runCatching {
+                        val fetched = api.fetchContacts()
+                        if (fetched.isNotEmpty()) prefs.setContacts(fetched)
+                    }
                 }
                 startActivity(Intent(this@LoginActivity, OnboardingActivity::class.java))
                 finish()

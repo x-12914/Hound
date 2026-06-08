@@ -97,6 +97,24 @@ class Api(private val prefs: Prefs) {
         return token
     }
 
+    /** The current user's emergency contacts, cached for offline SMS. Empty on failure. */
+    fun fetchContacts(): List<ContactInput> {
+        val req = authedBuilder("/api/contacts").get().build()
+        client.newCall(req).execute().use { resp ->
+            val body = resp.body?.string().orEmpty()
+            if (!resp.isSuccessful || body.isBlank()) return emptyList()
+            return try {
+                val arr = JSONArray(body)
+                (0 until arr.length()).map { i ->
+                    val o = arr.getJSONObject(i)
+                    ContactInput(o.optString("name"), o.optString("phone"), o.optString("relation"))
+                }
+            } catch (e: Exception) {
+                emptyList()
+            }
+        }
+    }
+
     /** Registers/updates this device, returns the server device id. */
     fun registerDevice(name: String): Int {
         val payload = JSONObject()

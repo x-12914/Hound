@@ -93,6 +93,8 @@ class SosForegroundService : Service() {
             SosController.State.IDLE -> guardianNotification()
             SosController.State.TRIGGERING -> alertNotification("Sending alert…")
             SosController.State.ACTIVE -> alertNotification("SOS ACTIVE — help is being notified")
+            SosController.State.OFFLINE_SMS ->
+                alertNotification("No internet — SOS sent to your contacts by SMS")
             SosController.State.ERROR -> guardianNotification("Last alert failed to send")
         }
         startInForeground(notif)

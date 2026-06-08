@@ -7,6 +7,8 @@ import com.hound.app.audio.AudioRecorder
 import com.hound.app.data.Api
 import com.hound.app.data.Prefs
 import com.hound.app.location.LocationStreamer
+import com.hound.app.net.Connectivity
+import com.hound.app.sms.SmsAlerter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -17,32 +19,39 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 
 /**
- * Owns one active emergency: creates the alert, streams location, and uploads
- * rolling audio clips until cancelled. Hosted by the foreground service. All
- * network work runs on Dispatchers.IO; transient failures are swallowed and
- * retried on the next cycle.
+ * Owns one active emergency.
+ *
+ * Online: creates the alert, streams location, uploads rolling audio clips.
+ * Offline: texts the emergency contacts a location SMS and keeps watching for a
+ * signal — the moment internet returns it auto-upgrades to the full online alert
+ * (dashboard + live location + audio).
  */
 class SosController(
     private val context: Context,
     private val prefs: Prefs,
     private val onState: (State) -> Unit,
 ) {
-    enum class State { IDLE, TRIGGERING, ACTIVE, ERROR }
+    enum class State { IDLE, TRIGGERING, ACTIVE, OFFLINE_SMS, ERROR }
 
     private val api = Api(prefs)
     private val location = LocationStreamer(context)
     private val audio = AudioRecorder(context)
+    private val sms = SmsAlerter(context)
 
     private var scope: CoroutineScope? = null
     private var alertId: Int? = null
 
-    @Volatile
-    var active: Boolean = false
+    @Volatile private var onlineAlertId: Int? = null
+    @Volatile private var lastFix: Location? = null
+    @Volatile private var smsModeUsed = false
+
+    @Volatile var active: Boolean = false
         private set
 
     fun trigger() {
         if (active) return
         active = true
+        smsModeUsed = false
         onState(State.TRIGGERING)
         val s = CoroutineScope(SupervisorJob() + Dispatchers.IO)
         scope = s
@@ -51,20 +60,35 @@ class SosController(
 
     private suspend fun run() {
         try {
-            val deviceId = ensureDevice()
-            val first = awaitLastKnown()
-            val id = api.createAlert(
-                deviceId, first?.latitude, first?.longitude, first?.accuracy,
-            )
-            alertId = id
-            onState(State.ACTIVE)
+            lastFix = awaitLastKnown()
+            // GPS works with no internet, so start collecting fixes either way.
+            startLocationCollection()
 
-            scope?.launch { streamLocation(id) }
-            if (prefs.captureAudio) scope?.launch { audioLoop(id) }
+            val id = if (Connectivity.hasInternet(context)) tryCreateAlert() else null
+            if (id != null) {
+                goOnline(id)
+            } else {
+                onState(State.OFFLINE_SMS)
+                scope?.launch { offlineLoop() }
+            }
         } catch (e: Exception) {
             onState(State.ERROR)
             active = false
         }
+    }
+
+    private fun goOnline(id: Int) {
+        alertId = id
+        onlineAlertId = id   // from now on, new fixes are pushed to the server
+        onState(State.ACTIVE)
+        if (prefs.captureAudio) scope?.launch { audioLoop(id) }
+    }
+
+    private suspend fun tryCreateAlert(): Int? = try {
+        val deviceId = ensureDevice()
+        api.createAlert(deviceId, lastFix?.latitude, lastFix?.longitude, lastFix?.accuracy)
+    } catch (e: Exception) {
+        null
     }
 
     private suspend fun ensureDevice(): Int {
@@ -73,22 +97,53 @@ class SosController(
     }
 
     private suspend fun awaitLastKnown(): Location? =
-        suspendCancellableCoroutine { cont ->
-            location.lastKnown { cont.resume(it) }
-        }
+        suspendCancellableCoroutine { cont -> location.lastKnown { cont.resume(it) } }
 
-    private suspend fun streamLocation(id: Int) {
+    private fun startLocationCollection() {
         val interval = prefs.locationIntervalSec.coerceAtLeast(3)
         location.start(interval) { loc ->
-            scope?.launch {
-                try {
-                    api.pushLocation(id, loc.latitude, loc.longitude, loc.accuracy, loc.speed)
-                } catch (e: Exception) { /* next fix retries */ }
+            lastFix = loc
+            val id = onlineAlertId
+            if (id != null) {
+                scope?.launch {
+                    try {
+                        api.pushLocation(id, loc.latitude, loc.longitude, loc.accuracy, loc.speed)
+                    } catch (e: Exception) { /* next fix retries */ }
+                }
             }
         }
-        // Keep this coroutine alive while the alert is active so updates flow.
-        while (active) delay(1000)
-        location.stop()
+    }
+
+    private suspend fun offlineLoop() {
+        sendSmsBurst(allClear = false)
+        var lastSms = SystemClock.elapsedRealtime()
+        val updateMs = prefs.smsUpdateMin.coerceIn(1, 30) * 60_000L
+        while (active) {
+            delay(15_000)
+            if (!active) break
+            // Try to come back online — if we can, switch to the full alert.
+            if (Connectivity.hasInternet(context)) {
+                val id = tryCreateAlert()
+                if (id != null) {
+                    goOnline(id)
+                    return
+                }
+            }
+            // Still offline: re-send the location SMS on the chosen cadence.
+            if (SystemClock.elapsedRealtime() - lastSms >= updateMs) {
+                sendSmsBurst(allClear = false)
+                lastSms = SystemClock.elapsedRealtime()
+            }
+        }
+    }
+
+    private fun sendSmsBurst(allClear: Boolean) {
+        if (!prefs.smsFallback || !sms.canSend()) return
+        val contacts = prefs.getContacts()
+        if (contacts.isEmpty()) return
+        val who = prefs.ownerName?.takeIf { it.isNotBlank() } ?: prefs.email ?: "Someone"
+        val sent = sms.sendSos(contacts, who, lastFix, allClear)
+        if (sent > 0) smsModeUsed = true
     }
 
     private suspend fun audioLoop(id: Int) {
@@ -97,9 +152,7 @@ class SosController(
             try {
                 audio.start()
                 val start = SystemClock.elapsedRealtime()
-                while (SystemClock.elapsedRealtime() - start < clipMs && active) {
-                    delay(250)
-                }
+                while (SystemClock.elapsedRealtime() - start < clipMs && active) delay(250)
                 val file = audio.stop() ?: continue
                 val dur = (SystemClock.elapsedRealtime() - start) / 1000.0
                 try {
@@ -115,22 +168,31 @@ class SosController(
     }
 
     fun cancel(status: String = "cancelled") {
-        if (!active && alertId == null) return
+        if (!active && alertId == null && !smsModeUsed) return
         active = false
         val id = alertId
+        val notifyContacts = smsModeUsed
+        val contacts = if (notifyContacts) prefs.getContacts() else emptyList()
+        val who = prefs.ownerName?.takeIf { it.isNotBlank() } ?: prefs.email ?: "Someone"
+        val lastLoc = lastFix
 
-        // Fire-and-forget status update on a fresh scope so cancelling the main
-        // scope below doesn't kill the request.
-        if (id != null) {
-            CoroutineScope(Dispatchers.IO).launch {
+        // Fire-and-forget on a fresh scope so cancelling the main scope doesn't kill it.
+        CoroutineScope(Dispatchers.IO).launch {
+            if (id != null) {
                 try { api.updateStatus(id, status) } catch (e: Exception) {}
             }
+            if (notifyContacts) {
+                try { sms.sendSos(contacts, who, lastLoc, allClear = true) } catch (e: Exception) {}
+            }
         }
+
         location.stop()
         audio.stop()
         scope?.cancel()
         scope = null
         alertId = null
+        onlineAlertId = null
+        smsModeUsed = false
         onState(State.IDLE)
     }
 }

@@ -53,6 +53,20 @@
             android:text="Capture audio during alerts"
             android:textColor="@color/text" />
 
+        <Switch
+            android:id="@+id/smsFallback"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="SMS my contacts when there's no internet"
+            android:textColor="@color/text" />
+
+        <TextView style="@style/SettingLabel" android:text="Offline SMS update interval (min)" />
+        <EditText
+            android:id="@+id/smsUpdateMin"
+            style="@style/SettingInput"
+            android:inputType="number" />
+
         <TextView style="@style/SettingLabel" android:text="Server URL" />
         <EditText
             android:id="@+id/serverUrl"
