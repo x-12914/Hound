@@ -33,8 +33,6 @@ class LoginActivity : AppCompatActivity() {
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        binding.serverUrl.setText(prefs.baseUrl)
-
         binding.toggleMode.setOnClickListener {
             registerMode = !registerMode
             val vis = if (registerMode) android.view.View.VISIBLE else android.view.View.GONE
@@ -48,10 +46,9 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun submit() {
-        val url = binding.serverUrl.text.toString().trim()
         val email = binding.email.text.toString().trim()
         val pass = binding.password.text.toString()
-        if (url.isEmpty() || email.isEmpty() || pass.isEmpty()) {
+        if (email.isEmpty() || pass.isEmpty()) {
             toast("Fill in all fields"); return
         }
 
@@ -77,7 +74,6 @@ class LoginActivity : AppCompatActivity() {
         }
 
         val fullName = binding.nameInput.text.toString().trim()
-        prefs.baseUrl = url
         binding.submit.isEnabled = false
 
         lifecycleScope.launch {

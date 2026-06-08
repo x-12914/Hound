@@ -24,7 +24,6 @@ class SettingsActivity : AppCompatActivity() {
         binding.captureAudio.isChecked = prefs.captureAudio
         binding.smsFallback.isChecked = prefs.smsFallback
         binding.smsUpdateMin.setText(prefs.smsUpdateMin.toString())
-        binding.serverUrl.setText(prefs.baseUrl)
 
         binding.save.setOnClickListener { save() }
     }
@@ -37,7 +36,6 @@ class SettingsActivity : AppCompatActivity() {
         prefs.captureAudio = binding.captureAudio.isChecked
         prefs.smsFallback = binding.smsFallback.isChecked
         prefs.smsUpdateMin = binding.smsUpdateMin.text.toString().toIntOrNull()?.coerceIn(1, 30) ?: 2
-        prefs.baseUrl = binding.serverUrl.text.toString().trim()
         Toast.makeText(this, "Saved", Toast.LENGTH_SHORT).show()
         finish()
     }

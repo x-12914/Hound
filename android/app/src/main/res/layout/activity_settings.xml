@@ -67,12 +67,6 @@
             style="@style/SettingInput"
             android:inputType="number" />
 
-        <TextView style="@style/SettingLabel" android:text="Server URL" />
-        <EditText
-            android:id="@+id/serverUrl"
-            style="@style/SettingInput"
-            android:inputType="textUri" />
-
         <Button
             android:id="@+id/save"
             android:layout_width="match_parent"

@@ -9,9 +9,9 @@ import java.util.UUID
 class Prefs(context: Context) {
     private val sp = context.getSharedPreferences("hound", Context.MODE_PRIVATE)
 
-    var baseUrl: String
-        get() = sp.getString("base_url", DEFAULT_BASE_URL) ?: DEFAULT_BASE_URL
-        set(v) = sp.edit().putString("base_url", v.trimEnd('/')).apply()
+    /** Hard-wired to the production server — users cannot change it. */
+    val baseUrl: String
+        get() = DEFAULT_BASE_URL
 
     var token: String?
         get() = sp.getString("token", null)
