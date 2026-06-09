@@ -34,12 +34,16 @@
         <span id="ws-status" class="ws-dot offline" title="realtime status"></span>
         <span id="ws-label">connecting…</span>
       </div>
+      <nav class="nav">
+        <button id="nav-alerts" class="nav-btn active">Alerts</button>
+        <button id="nav-people" class="nav-btn">People</button>
+      </nav>
       <div class="spacer"></div>
       <span id="who" class="who"></span>
       <button id="logout" class="ghost">Sign out</button>
     </header>
 
-    <main class="layout">
+    <main class="layout" id="alerts-view">
       <aside class="sidebar">
         <div class="filter-row">
           <button class="filter active" data-filter="active">Active</button>
@@ -53,6 +57,14 @@
         <div id="detail" class="detail hidden"></div>
       </section>
     </main>
+
+    <section id="people-view" class="people-view hidden">
+      <div class="people-head">
+        <h2>Protected people</h2>
+        <p>Everyone registered, with the emergency contacts they signed up with.</p>
+      </div>
+      <div id="people-list" class="people-list"></div>
+    </section>
   </div>
 
   <audio id="siren" preload="auto"></audio>

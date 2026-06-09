@@ -9,7 +9,7 @@ from sqlmodel import Session, select
 from .config import settings
 from .database import engine, init_db
 from .models import Role, User
-from .routers import alerts, auth, contacts, devices, realtime
+from .routers import alerts, auth, contacts, devices, realtime, users
 from .security import hash_password
 
 
@@ -52,6 +52,7 @@ app.include_router(auth.router)
 app.include_router(devices.router)
 app.include_router(alerts.router)
 app.include_router(contacts.router)
+app.include_router(users.router)
 app.include_router(realtime.router)
 
 

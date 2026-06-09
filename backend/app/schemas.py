@@ -51,6 +51,16 @@ class UserOut(BaseModel):
         from_attributes = True
 
 
+class UserWithContactsOut(BaseModel):
+    id: int
+    email: EmailStr
+    full_name: str
+    role: Role
+    created_at: datetime
+    device_count: int = 0
+    contacts: list[EmergencyContactOut] = []
+
+
 # ---- Devices ----
 
 

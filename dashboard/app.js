@@ -385,6 +385,79 @@ function escapeHtml(s) {
     ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 }
 
+// ---------------------------------------------------------------------------
+// People view — roster of registered users + their emergency contacts
+// ---------------------------------------------------------------------------
+function showView(which) {
+  const alertsView = $("#alerts-view");
+  const peopleView = $("#people-view");
+  if (which === "people") {
+    alertsView.classList.add("hidden");
+    peopleView.classList.remove("hidden");
+    $("#nav-people").classList.add("active");
+    $("#nav-alerts").classList.remove("active");
+    loadPeople();
+  } else {
+    peopleView.classList.add("hidden");
+    alertsView.classList.remove("hidden");
+    $("#nav-alerts").classList.add("active");
+    $("#nav-people").classList.remove("active");
+    if (map) setTimeout(() => map.invalidateSize(), 60); // re-render tiles
+  }
+}
+
+function personInitials(name, email) {
+  const s = (name && name.trim()) || email || "?";
+  const parts = s.trim().split(/\s+/);
+  if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+  return s.slice(0, 2).toUpperCase();
+}
+
+async function loadPeople() {
+  const list = $("#people-list");
+  list.innerHTML = '<div class="person-empty">Loading…</div>';
+  try {
+    const res = await api("/api/users");
+    renderPeople(await res.json());
+  } catch (e) {
+    list.innerHTML = '<div class="person-empty">Couldn\'t load people.</div>';
+  }
+}
+
+function renderPeople(people) {
+  const list = $("#people-list");
+  if (!people || !people.length) {
+    list.innerHTML = '<div class="person-empty">No registered people yet.</div>';
+    return;
+  }
+  list.innerHTML = people.map((p) => {
+    const joined = p.created_at ? new Date(p.created_at).toLocaleDateString() : "";
+    const contacts = (p.contacts || []).length
+      ? p.contacts.map((ct) => `
+          <div class="contact">
+            <div class="contact-main">
+              <span class="contact-name">${escapeHtml(ct.name)}</span>
+              ${ct.relation ? `<span class="contact-rel">${escapeHtml(ct.relation)}</span>` : ""}
+            </div>
+            ${ct.phone ? `<a class="contact-phone" href="tel:${escapeHtml(ct.phone)}">${escapeHtml(ct.phone)}</a>` : ""}
+          </div>`).join("")
+      : '<div class="person-empty">No contacts on file.</div>';
+    const devLabel = `${p.device_count} device${p.device_count === 1 ? "" : "s"}`;
+    return `<div class="person">
+      <div class="person-head">
+        <div class="person-avatar">${escapeHtml(personInitials(p.full_name, p.email))}</div>
+        <div class="person-id">
+          <div class="person-name">${escapeHtml(p.full_name || "Unnamed")}</div>
+          <div class="person-email">${escapeHtml(p.email)}</div>
+          <div class="person-meta">${devLabel} · joined ${joined}</div>
+        </div>
+      </div>
+      <div class="person-contacts-title">Emergency contacts</div>
+      ${contacts}
+    </div>`;
+  }).join("");
+}
+
 async function start() {
   $("#app").classList.remove("hidden");
   $("#login").classList.add("hidden");
@@ -409,6 +482,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
   $("#logout").addEventListener("click", logout);
+  $("#nav-alerts").addEventListener("click", () => showView("alerts"));
+  $("#nav-people").addEventListener("click", () => showView("people"));
   document.querySelectorAll(".filter").forEach((b) => {
     b.addEventListener("click", () => {
       document.querySelectorAll(".filter").forEach((x) => x.classList.remove("active"));
